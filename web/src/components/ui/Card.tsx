@@ -6,22 +6,19 @@ interface CardProps {
   hover?: boolean;
   onClick?: () => void;
   padding?: 'none' | 'sm' | 'md' | 'lg';
+  glass?: boolean;
 }
 
-const paddings = {
-  none: '',
-  sm:   'p-3',
-  md:   'p-5',
-  lg:   'p-6',
-};
+const paddings = { none: '', sm: 'p-4', md: 'p-5', lg: 'p-7' };
 
 export const Card: React.FC<CardProps> = ({
-  children, className = '', hover, onClick, padding = 'md',
+  children, className = '', hover, onClick, padding = 'md', glass,
 }) => (
   <div
     onClick={onClick}
     className={`
-      bg-white rounded-2xl border border-gray-100 shadow-card
+      ${glass ? 'glass-card' : 'bg-white border border-mist-100'}
+      rounded-3xl
       ${hover ? 'card-hover cursor-pointer' : ''}
       ${paddings[padding]}
       ${className}
@@ -36,8 +33,8 @@ export const CardHeader: React.FC<{ title: string; subtitle?: string; action?: R
 }) => (
   <div className="flex items-start justify-between mb-4">
     <div>
-      <h3 className="font-semibold text-gray-900">{title}</h3>
-      {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
+      <h3 className="font-display font-semibold text-ink-900 tracking-tight">{title}</h3>
+      {subtitle && <p className="text-sm text-mist-500 mt-0.5">{subtitle}</p>}
     </div>
     {action}
   </div>

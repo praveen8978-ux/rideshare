@@ -9,21 +9,15 @@ interface StarRatingProps {
   count?: number;
 }
 
-export const StarRating: React.FC<StarRatingProps> = ({
-  rating, max = 5, size = 14, showValue, count,
-}) => (
+export const StarRating: React.FC<StarRatingProps> = ({ rating, max = 5, size = 14, showValue, count }) => (
   <div className="flex items-center gap-1">
     {Array.from({ length: max }).map((_, i) => (
-      <Star
-        key={i}
-        size={size}
-        className={i < Math.round(rating) ? 'text-amber-400 fill-amber-400' : 'text-gray-200 fill-gray-200'}
-      />
+      <Star key={i} size={size} className={i < Math.round(rating) ? 'text-gold-500 fill-gold-500' : 'text-mist-200 fill-mist-200'} />
     ))}
     {showValue && (
-      <span className="text-sm font-medium text-gray-700 ml-1">
+      <span className="text-sm font-medium text-ink-700 ml-1">
         {rating.toFixed(1)}
-        {count !== undefined && <span className="text-gray-400 font-normal"> ({count})</span>}
+        {count !== undefined && <span className="text-mist-400 font-normal"> ({count})</span>}
       </span>
     )}
   </div>

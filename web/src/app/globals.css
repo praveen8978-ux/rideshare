@@ -2,91 +2,147 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 :root {
-  --font-inter: 'Inter', sans-serif;
+  --font-display: 'Cabinet Grotesk', 'Space Grotesk', sans-serif;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 body {
-  font-family: var(--font-inter);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: #FDFCFF;
 }
 
-/* Scrollbar */
+/* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #f1f5f9; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D9D3EC; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #B794F6; }
 
-/* Glass morphism utility */
+/* ── Glass surfaces ── */
 .glass {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(253, 252, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-/* Gradient backgrounds */
-.gradient-primary {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #3730a3 100%);
+.glass-dark {
+  background: rgba(15, 11, 31, 0.55);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.gradient-hero {
-  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%);
+.glass-card {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
 }
 
-/* Card hover effect */
+/* ── Premium gradient backgrounds ── */
+.gradient-ink {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124, 92, 255, 0.35), transparent),
+    radial-gradient(ellipse 60% 40% at 90% 90%, rgba(183, 148, 246, 0.15), transparent),
+    linear-gradient(180deg, #0A0714 0%, #0F0B1F 50%, #15102A 100%);
+}
+
+.gradient-violet {
+  background: linear-gradient(135deg, #7C5CFF 0%, #6845E8 50%, #5333C7 100%);
+}
+
+.gradient-mesh {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(124, 92, 255, 0.08), transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(183, 148, 246, 0.08), transparent 40%),
+    #FDFCFF;
+}
+
+/* ── Route line signature element ── */
+.route-line {
+  position: relative;
+}
+.route-line::before {
+  content: '';
+  position: absolute;
+  left: 5px; top: 16px; bottom: 16px;
+  width: 1.5px;
+  background: linear-gradient(180deg, #7C5CFF, transparent 90%);
+  opacity: 0.4;
+}
+
+@keyframes route-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%      { opacity: 0.7; transform: scale(1.15); }
+}
+.route-dot-pulse { animation: route-pulse 2.4s ease-in-out infinite; }
+
+@keyframes route-travel {
+  0%   { stroke-dashoffset: 24; }
+  100% { stroke-dashoffset: 0; }
+}
+.route-travel { stroke-dasharray: 4 4; animation: route-travel 1.2s linear infinite; }
+
+/* ── Card hover ── */
 .card-hover {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
 }
 .card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(124, 92, 255, 0.12);
+  border-color: rgba(124, 92, 255, 0.2);
 }
 
-/* Input focus ring */
-.input-ring {
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
+/* ── Input focus ── */
+.input-ring { transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; }
 .input-ring:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  border-color: #7C5CFF;
+  box-shadow: 0 0 0 4px rgba(124, 92, 255, 0.12);
   outline: none;
 }
 
-/* Shimmer loading */
-@keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position:  200% 0; }
-}
+/* ── Shimmer ── */
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 .shimmer {
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background: linear-gradient(90deg, #F7F5FC 25%, #ECE8F7 50%, #F7F5FC 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
 
-/* Fade in */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.fade-in { animation: fadeIn 0.3s ease forwards; }
+/* ── Fade / scale entrance ── */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-/* Pulse dot for live indicator */
-@keyframes pulse-dot {
-  0%, 100% { transform: scale(1);   opacity: 1; }
-  50%       { transform: scale(1.4); opacity: 0.7; }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+.scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* ── Pulse dot (live indicator) ── */
+@keyframes pulse-dot { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.6; } }
+.pulse-dot { animation: pulse-dot 1.8s ease-in-out infinite; }
+
+/* ── Glow text ── */
+.text-glow {
+  text-shadow: 0 0 30px rgba(124, 92, 255, 0.5);
 }
-.pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
+
+/* ── Noise texture overlay ── */
+.noise-overlay {
+  position: relative;
+}
+.noise-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* ── Selection ── */
+::selection { background: #B794F6; color: #0F0B1F; }

@@ -13,33 +13,33 @@ export const Input: React.FC<InputProps> = ({
 }) => (
   <div className="w-full">
     {label && (
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+      <label className="block text-[13px] font-medium text-ink-700 mb-1.5 tracking-tight">
         {label}
       </label>
     )}
     <div className="relative">
       {icon && (
-        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-mist-400">
           {icon}
         </div>
       )}
       <input
         className={`
-          w-full rounded-xl border bg-white text-gray-900 placeholder-gray-400
-          py-2.5 pr-4 text-sm input-ring
-          ${icon ? 'pl-10' : 'pl-4'}
-          ${error ? 'border-red-400 focus:ring-red-200' : 'border-gray-200'}
+          w-full rounded-2xl border bg-white/70 backdrop-blur-sm text-ink-900 placeholder-mist-400
+          py-3 pr-4 text-[15px] input-ring
+          ${icon ? 'pl-11' : 'pl-4'}
+          ${error ? 'border-danger-400 focus:ring-danger-200' : 'border-mist-200'}
           ${className}
         `}
         {...props}
       />
       {rightElement && (
-        <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+        <div className="absolute right-4 top-1/2 -translate-y-1/2">
           {rightElement}
         </div>
       )}
     </div>
-    {error && <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1">⚠ {error}</p>}
-    {hint && !error && <p className="mt-1.5 text-xs text-gray-400">{hint}</p>}
+    {error && <p className="mt-1.5 text-xs text-danger-500 flex items-center gap-1">⚠ {error}</p>}
+    {hint && !error && <p className="mt-1.5 text-xs text-mist-500">{hint}</p>}
   </div>
 );

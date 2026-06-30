@@ -1,7 +1,6 @@
 'use client';
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
-import { Button } from './Button';
 
 interface ModalProps {
   open: boolean;
@@ -12,18 +11,13 @@ interface ModalProps {
   hideClose?: boolean;
 }
 
-const sizes = {
-  sm: 'max-w-sm',
-  md: 'max-w-md',
-  lg: 'max-w-lg',
-};
+const sizes = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg' };
 
 export const Modal: React.FC<ModalProps> = ({
   open, onClose, title, children, size = 'md', hideClose,
 }) => {
   useEffect(() => {
-    if (open) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = '';
+    document.body.style.overflow = open ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [open]);
 
@@ -31,22 +25,13 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      <div className={`
-        relative bg-white rounded-2xl shadow-modal w-full ${sizes[size]}
-        fade-in overflow-hidden
-      `}>
+      <div className="absolute inset-0 bg-ink-950/50 backdrop-blur-sm" onClick={onClose} />
+      <div className={`relative glass rounded-3xl shadow-glass-lg w-full ${sizes[size]} scale-in overflow-hidden`}>
         {(title || !hideClose) && (
-          <div className="flex items-center justify-between p-5 border-b border-gray-100">
-            {title && <h2 className="font-semibold text-gray-900 text-lg">{title}</h2>}
+          <div className="flex items-center justify-between p-5 border-b border-mist-100">
+            {title && <h2 className="font-display font-semibold text-ink-900 text-lg tracking-tight">{title}</h2>}
             {!hideClose && (
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors ml-auto"
-              >
+              <button onClick={onClose} className="p-1.5 rounded-xl hover:bg-mist-100 text-mist-400 hover:text-ink-700 transition-colors ml-auto">
                 <X size={18} />
               </button>
             )}
