@@ -49,7 +49,8 @@ export default function LoginPage() {
         otp:   code,
       });
       if (data.requiresName) { setStep('name'); return; }
-      setTokens(data.token, data.refreshToken);
+      setTokens(data.accessToken, data.refreshToken);
+      if (data.sessionId) localStorage.setItem('sessionId', data.sessionId);
       saveUser(data.user);
       toast.success('Welcome back');
       router.push('/dashboard');
@@ -73,7 +74,8 @@ export default function LoginPage() {
         otp,
         name:  name.trim(),
       });
-      setTokens(data.token, data.refreshToken);
+      setTokens(data.accessToken, data.refreshToken);
+      if (data.sessionId) localStorage.setItem('sessionId', data.sessionId);
       saveUser(data.user);
       toast.success('Welcome to RideShare');
       router.push('/dashboard');

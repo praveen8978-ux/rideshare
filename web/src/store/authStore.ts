@@ -24,7 +24,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
   loading: false,
 
   logout: async () => {
-    try { await api.post('/auth/logout'); } catch {}
+    try {
+      const refreshToken = localStorage.getItem('refreshToken');
+      await api.post('/auth/logout', { refreshToken });
+    } catch {}
     clearTokens();
     set({ user: null });
     window.location.href = '/login';

@@ -1,14 +1,18 @@
-export const getToken = () =>
-  typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+export const getAccessToken = () =>
+  typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 
-export const setTokens = (token: string, refreshToken: string) => {
-  localStorage.setItem('token', token);
+export const getRefreshToken = () =>
+  typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
+
+export const setTokens = (accessToken: string, refreshToken: string) => {
+  localStorage.setItem('accessToken', accessToken);
   localStorage.setItem('refreshToken', refreshToken);
 };
 
 export const clearTokens = () => {
-  localStorage.removeItem('token');
+  localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
+  localStorage.removeItem('sessionId');
   localStorage.removeItem('user');
 };
 
@@ -21,4 +25,7 @@ export const getUser = () => {
 export const setUser = (user: object) =>
   localStorage.setItem('user', JSON.stringify(user));
 
-export const isLoggedIn = () => !!getToken();
+export const isLoggedIn = () => !!getAccessToken();
+
+// Backward compat alias
+export const getToken = getAccessToken;
