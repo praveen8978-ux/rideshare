@@ -23,27 +23,32 @@ const initSocketHandlers = (io) => {
     logger.info(`Socket connected: ${socket.user.id}`);
     socket.join(`user:${socket.user.id}`);
 
-    // Driver joins ride room
+    // ── Driver joins ride room ────────────────────────────
     socket.on('driver:join_ride', async ({ rideId }) => {
       try {
         const { rows } = await db.query(
-          'SELECT id FROM rides WHERE id = $1 AND driver_id = $2 AND status = $3',
-          [rideId, socket.user.id, 'active']
+          'SELECT id FROM rides WHERE id = $1 AND driver_id = $2',
+          [rideId, socket.user.id]
         );
         if (!rows[0]) return socket.emit('error', { message: 'Ride not found' });
         socket.join(`ride:${rideId}`);
         socket.currentRideId = rideId;
-        socket.to(`ride:${rideId}`).emit('driver:online', { driverId: socket.user.id });
+        io.to(`ride:${rideId}`).emit('driver:online', { driverId: socket.user.id });
+        logger.info(`Driver ${socket.user.id} joined ride ${rideId}`);
       } catch (err) { logger.error('driver:join_ride error', { err }); }
     });
 
-    // Driver broadcasts location
+    // ── Driver broadcasts location (io.to = includes sender) ──
     socket.on('driver:location', async ({ rideId, lat, lng, speedKmh, heading }) => {
       try {
         if (!lat || !lng) return;
-        socket.to(`ride:${rideId}`).emit('driver:location_update', {
+
+        // io.to broadcasts to ALL sockets in room including sender
+        io.to(`ride:${rideId}`).emit('driver:location_update', {
           driverId: socket.user.id, lat, lng, speedKmh, heading, ts: Date.now(),
         });
+
+        // Save to DB every 10 seconds
         const now = Date.now();
         if (!socket.lastSavedAt || now - socket.lastSavedAt > 10000) {
           await db.query(
@@ -56,42 +61,66 @@ const initSocketHandlers = (io) => {
       } catch (err) { logger.error('driver:location error', { err }); }
     });
 
-    // Passenger subscribes to ride
+    // ── Passenger subscribes to ride ─────────────────────
     socket.on('passenger:subscribe_ride', async ({ rideId }) => {
       try {
-        const { rows } = await db.query(
-          `SELECT id FROM bookings WHERE ride_id = $1 AND passenger_id = $2 AND status = 'accepted'`,
-          [rideId, socket.user.id]
+        // Allow driver to also subscribe to their own ride
+        const { rows: rideRows } = await db.query(
+          `SELECT id, driver_id FROM rides WHERE id = $1`, [rideId]
         );
-        if (!rows[0]) return socket.emit('error', { message: 'No active booking' });
+        const isDriver = rideRows[0]?.driver_id === socket.user.id;
+
+        if (!isDriver) {
+          const { rows } = await db.query(
+            `SELECT id FROM bookings
+             WHERE ride_id = $1 AND passenger_id = $2 AND status = 'accepted'`,
+            [rideId, socket.user.id]
+          );
+          if (!rows[0]) return socket.emit('error', { message: 'No active booking' });
+        }
+
         socket.join(`ride:${rideId}`);
+        logger.info(`${isDriver ? 'Driver' : 'Passenger'} ${socket.user.id} subscribed to ride ${rideId}`);
+
+        // Send last known location immediately
         const { rows: loc } = await db.query(
-          `SELECT lat, lng, speed_kmh, heading, recorded_at FROM ride_locations
-           WHERE ride_id = $1 ORDER BY recorded_at DESC LIMIT 1`,
+          `SELECT lat, lng, speed_kmh, heading, recorded_at
+           FROM ride_locations WHERE ride_id = $1
+           ORDER BY recorded_at DESC LIMIT 1`,
           [rideId]
         );
-        if (loc[0]) socket.emit('driver:location_update', { ...loc[0], ts: new Date(loc[0].recorded_at).getTime() });
+        if (loc[0]) {
+          socket.emit('driver:location_update', {
+            ...loc[0],
+            ts: new Date(loc[0].recorded_at).getTime(),
+          });
+        }
       } catch (err) { logger.error('passenger:subscribe_ride error', { err }); }
     });
 
-    // SOS
+    // ── SOS ──────────────────────────────────────────────
     socket.on('passenger:sos', async ({ rideId, lat, lng }) => {
       try {
         const { rows } = await db.query(
-          `SELECT b.*, r.driver_id FROM bookings b JOIN rides r ON r.id = b.ride_id
+          `SELECT b.*, r.driver_id FROM bookings b
+           JOIN rides r ON r.id = b.ride_id
            WHERE b.ride_id = $1 AND b.passenger_id = $2 AND b.status = 'accepted'`,
           [rideId, socket.user.id]
         );
         if (!rows[0]) return;
         io.to(`user:${rows[0].driver_id}`).emit('sos:alert', {
-          passengerName: socket.user.name, passengerId: socket.user.id, lat, lng, rideId,
+          passengerName: socket.user.name,
+          passengerId: socket.user.id,
+          lat, lng, rideId,
         });
-        io.to('admins').emit('sos:alert', { rideId, passengerId: socket.user.id, lat, lng, ts: Date.now() });
-        logger.warn(`SOS from passenger ${socket.user.id} on ride ${rideId}`);
+        io.to('admins').emit('sos:alert', {
+          rideId, passengerId: socket.user.id, lat, lng, ts: Date.now(),
+        });
+        logger.warn(`SOS from ${socket.user.id} on ride ${rideId}`);
       } catch (err) { logger.error('passenger:sos error', { err }); }
     });
 
-    // In-ride chat
+    // ── Chat ─────────────────────────────────────────────
     socket.on('chat:message', ({ rideId, message }) => {
       if (!message?.trim() || message.length > 500) return;
       io.to(`ride:${rideId}`).emit('chat:message', {
@@ -101,12 +130,18 @@ const initSocketHandlers = (io) => {
     });
 
     socket.on('chat:typing', ({ rideId }) => {
-      socket.to(`ride:${rideId}`).emit('chat:typing', { userId: socket.user.id, name: socket.user.name });
+      socket.to(`ride:${rideId}`).emit('chat:typing', {
+        userId: socket.user.id, name: socket.user.name,
+      });
     });
 
+    // ── Disconnect ────────────────────────────────────────
     socket.on('disconnect', () => {
-      if (socket.currentRideId)
-        socket.to(`ride:${socket.currentRideId}`).emit('driver:offline', { driverId: socket.user.id });
+      if (socket.currentRideId) {
+        io.to(`ride:${socket.currentRideId}`).emit('driver:offline', {
+          driverId: socket.user.id,
+        });
+      }
       logger.info(`Socket disconnected: ${socket.user.id}`);
     });
   });

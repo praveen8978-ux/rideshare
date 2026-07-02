@@ -6,15 +6,19 @@ let transporter = null;
 const getTransporter = () => {
   if (transporter) return transporter;
   transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
   return transporter;
 };
-
 exports.sendOTPEmail = async (email, otp, name = 'there') => {
   if (!process.env.EMAIL_USER) {
     logger.info(`[DEV] OTP for ${email}: ${otp}`);
